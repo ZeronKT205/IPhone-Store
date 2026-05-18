@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model RepairOrder {
+  id              String        @id @default(cuid())
+  orderCode       String        @unique
+  customerName    String
+  phoneNumber     String
+  description     String
+  repairFee       Int           @default(0)
+  warrantyMonths  Int           @default(0)
+  status          RepairStatus  @default(IN_PROGRESS)
+  isWarrantyOrder Boolean       @default(false)
+  originalOrderId String?
+  createdAt       DateTime      @default(now())
+  completedAt     DateTime?
+  originalOrder   RepairOrder?  @relation("WarrantyLink", fields: [originalOrderId], references: [id])
+  warrantyOrders  RepairOrder[] @relation("WarrantyLink")
+  warranty        Warranty?
+
+  @@index([phoneNumber])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Warranty {
+  id            String      @id @default(cuid())
+  repairOrderId String      @unique
+  startDate     DateTime
+  expiryDate    DateTime
+  notes         String?
+  repairOrder   RepairOrder @relation(fields: [repairOrderId], references: [id])
+}
+
+model Product {
+  id                String           @id @default(cuid())
+  name              String
+  categoryId        String
+  unit              String
+  image             String?
+  costPrice         Int?
+  sellingPrice      Int
+  stockQuantity     Int              @default(0)
+  lowStockThreshold Int              @default(5)
+  isActive          Boolean          @default(true)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  category          Category         @relation(fields: [categoryId], references: [id])
+  salesOrderItems   SalesOrderItem[]
+
+  @@index([isActive])
+  @@index([stockQuantity])
+}
+
+model Category {
+  id      String    @id @default(cuid())
+  name    String    @unique
+  products Product[]
+}
+
+model SalesOrder {
+  id              String           @id @default(cuid())
+  orderCode       String           @unique
+  orderType       OrderType
+  status          SalesOrderStatus
+  customerName    String?
+  customerPhone   String?
+  deliveryAddress String?
+  deliveryPerson  String?
+  notes           String?
+  paymentMethod   PaymentMethod?
+  totalAmount     Int              @default(0)
+  customerId      String?
+  employeeId      String?
+  createdAt       DateTime         @default(now())
+  completedAt     DateTime?
+  employee        Employee?        @relation(fields: [employeeId], references: [id])
+  customer        Customer?        @relation(fields: [customerId], references: [id])
+  items           SalesOrderItem[]
+
+  @@index([status])
+  @@index([orderType])
+  @@index([createdAt])
+}
+
+model SalesOrderItem {
+  id           String     @id @default(cuid())
+  salesOrderId String
+  productId    String
+  productName  String
+  quantity     Int
+  unitPrice    Int
+  product      Product    @relation(fields: [productId], references: [id])
+  salesOrder   SalesOrder @relation(fields: [salesOrderId], references: [id])
+}
+
+model Customer {
+  id          String       @id @default(cuid())
+  name        String
+  phone       String       @unique
+  address     String?
+  createdAt   DateTime     @default(now())
+  salesOrders SalesOrder[]
+
+  @@index([phone])
+}
+
+model Employee {
+  id          String       @id @default(cuid())
+  name        String
+  phone       String?
+  dateOfBirth DateTime?
+  cccd        String?
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  salesOrders SalesOrder[]
+}
+
+enum RepairStatus {
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum OrderType {
+  COUNTER
+  DELIVERY
+}
+
+enum SalesOrderStatus {
+  COUNTER_SALE
+  PROCESSING
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+}

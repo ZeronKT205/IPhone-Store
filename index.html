@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- SEO Meta Tags -->
+  <title>DUO TECH - Hệ Thống Quản Lý Cửa Hàng Sửa Chữa & Kho Linh Kiện Chuyên Nghiệp</title>
+  <meta name="description" content="DUO TECH - Phần mềm quản lý cửa hàng sửa chữa điện thoại tối ưu. Hỗ trợ tiếp nhận thiết bị, quản lý tồn kho linh phụ kiện, cập nhật trạng thái sửa chữa và báo giá trực tiếp. Hotline: 0948 203 816.">
+  <meta name="keywords" content="DUO TECH, quản lý sửa chữa điện thoại, quản lý kho linh kiện, phần mềm sửa chữa mobile, báo giá sửa chữa điện thoại, quản lý tồn kho phụ kiện">
+  <meta name="author" content="DUO TECH">
+  <meta name="robots" content="index, follow">
+  
+  <!-- Open Graph / Facebook SEO -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="DUO TECH - Quản Lý Cửa Hàng & Kho Linh Kiện">
+  <meta property="og:description" content="DUO TECH - Hệ thống quản lý chuyên nghiệp cho kỹ thuật viên sửa chữa thiết bị di động. Hotline hỗ trợ: 0948 203 816.">
+  <meta property="og:image" content="images/favicon.png">
+  <meta property="og:url" content="https://duotech.vn/">
+  
+  <!-- Twitter SEO -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="DUO TECH - Quản Lý Cửa Hàng & Kho Linh Kiện">
+  <meta name="twitter:description" content="DUO TECH - Trải nghiệm hệ thống quản lý cửa hàng sửa chữa điện thoại cao cấp. Hotline: 0948 203 816.">
+  <meta name="twitter:image" content="images/favicon.png">
+
+  <!-- Favicon -->
+  <link rel="icon" href="images/favicon.png" type="image/png">
+  <link rel="shortcut icon" href="images/favicon.png" type="image/png">
+
+  <!-- Google Fonts: Inter & Be Vietnam Pro for Vietnamese readability -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons for premium crisp SVGs -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-icon" style="padding: 0; overflow: hidden; background: transparent; box-shadow: none;">
+          <img src="images/duotech_logo.png" alt="DUO TECH Logo" style="width: 44px; height: 44px; object-fit: cover; border-radius: 10px; display: block;">
+        </div>
+        <div class="logo-text">
+          <h2>DUO TECH</h2>
+          <p>Quản lý sửa chữa</p>
+        </div>
+      </div>
+      
+      <nav class="sidebar-menu">
+        <ul>
+          <li>
+            <a href="#" class="menu-item" data-section="tong-quan">
+              <i data-lucide="layout-dashboard"></i>
+              <span>Tổng quan</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="menu-item" data-section="don-sua-chua">
+              <i data-lucide="wrench"></i>
+              <span>Đơn sửa chữa</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="menu-item active" data-section="kho-hang">
+              <i data-lucide="box"></i>
+              <span>Kho hàng</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="menu-item" data-section="ban-hang">
+              <i data-lucide="shopping-cart"></i>
+              <span>Bán hàng</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="menu-item" data-section="bao-hanh">
+              <i data-lucide="shield-check"></i>
+              <span>Bảo hành</span>
+            </a>
+          </li>
+          <li class="menu-divider"></li>
+          <li>
+            <a href="#" class="menu-item" data-section="cai-dat">
+              <i data-lucide="settings"></i>
+              <span>Cài đặt</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="menu-item logout-btn" id="btn-logout">
+              <i data-lucide="log-out"></i>
+              <span>Đăng xuất</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="store-status">
+          <span class="status-dot pulsing"></span>
+          <div class="status-info">
+            <h4>Cửa hàng của bạn</h4>
+            <p class="active-label">Đang hoạt động</p>
+          </div>
+          <i data-lucide="chevron-down" class="footer-chevron"></i>
+        </div>
+        <div class="sidebar-support" style="margin-top: 10px; padding: 10px 14px; background: rgba(212,175,55,0.08); border: 1px solid rgba(212,175,55,0.2); border-radius: 8px; display: flex; align-items: center; gap: 10px;">
+          <i data-lucide="phone-call" style="width: 16px; height: 16px; color: #d4af37; flex-shrink: 0;"></i>
+          <div style="min-width: 0;">
+            <p style="font-size: 10px; color: rgba(255,255,255,0.5); margin: 0; line-height: 1.2;">Hỗ trợ khách hàng</p>
+            <a href="tel:0948203816" style="font-size: 13px; font-weight: 700; color: #d4af37; text-decoration: none; letter-spacing: 0.5px;">0948 203 816</a>
+          </div>
+        </div>
+      </div>
+    </aside>
+    
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="main-content">
+      
+      <!-- TOP BAR / HEADER -->
+      <header class="header-bar">
+        <div class="header-title">
+          <h1 id="page-title">Kho hàng</h1>
+          <p id="page-subtitle">Quản lý danh mục sản phẩm và tồn kho</p>
+        </div>
+        
+
+      </header>
+
+      <!-- SECTION: KHO HÀNG (ACTIVE BY DEFAULT) -->
+      <section id="section-kho-hang" class="content-section active">
+        
+        <!-- METRIC CARDS -->
+        <div class="metrics-grid">
+          <!-- Card 1: Total Products -->
+          <div class="metric-card" id="card-total-products">
+            <div class="metric-icon bg-blue">
+              <i data-lucide="box"></i>
+            </div>
+            <div class="metric-details">
+              <p class="metric-label">Tổng sản phẩm</p>
+              <h3 class="metric-value" id="stat-total-products">128</h3>
+              <span class="metric-unit">SKU</span>
+            </div>
+          </div>
+          
+          <!-- Card 2: Total Inventory Qty -->
+          <div class="metric-card" id="card-total-stock">
+            <div class="metric-icon bg-green">
+              <i data-lucide="boxes"></i>
+            </div>
+            <div class="metric-details">
+              <p class="metric-label">Tổng tồn kho</p>
+              <h3 class="metric-value" id="stat-total-stock">1.245</h3>
+              <span class="metric-unit">sản phẩm</span>
+            </div>
+          </div>
+          
+          <!-- Card 3: Low Stock Warning (Clickable Filter) -->
+          <div class="metric-card alert-card clickable" id="card-low-stock" title="Nhấp để hiển thị danh sách sắp hết hàng">
+            <div class="metric-icon bg-orange">
+              <i data-lucide="alert-triangle"></i>
+            </div>
+            <div class="metric-details">
+              <p class="metric-label">Sắp hết hàng</p>
+              <h3 class="metric-value text-danger" id="stat-low-stock">12</h3>
+              <span class="metric-unit">sản phẩm</span>
+            </div>
+          </div>
+          
+          <!-- Card 4: Inventory Valuation -->
+          <div class="metric-card" id="card-valuation">
+            <div class="metric-icon bg-purple">
+              <i data-lucide="circle-dollar-sign"></i>
+            </div>
+            <div class="metric-details">
+              <p class="metric-label">Giá trị tồn kho</p>
+              <h3 class="metric-value text-purple" id="stat-valuation">38.650.000đ</h3>
+              <span class="metric-unit">VNĐ</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- FILTER BAR -->
+        <div class="filter-bar">
+          <div class="search-wrapper">
+            <i data-lucide="search" class="search-icon"></i>
+            <input type="text" id="input-search" placeholder="Tìm sản phẩm...">
+          </div>
+          
+          <div class="select-wrapper">
+            <select id="select-type">
+              <option value="">Tất cả loại</option>
+              <option value="ACCESSORY">Phụ kiện</option>
+              <option value="COMPONENT">Linh kiện</option>
+            </select>
+            <i data-lucide="chevron-down" class="select-chevron"></i>
+          </div>
+          
+          <div class="select-wrapper">
+            <select id="select-category">
+              <option value="">Tất cả danh mục</option>
+              <option value="iphone-15">iPhone 15 Series</option>
+              <option value="iphone-11">iPhone 11 Series</option>
+              <option value="sac-cap">Sạc & Cáp sạc</option>
+              <option value="pin-man-hinh">Pin & Màn hình</option>
+            </select>
+            <i data-lucide="chevron-down" class="select-chevron"></i>
+          </div>
+          
+          <div class="select-wrapper">
+            <select id="select-stock-status">
+              <option value="">Tất cả trạng thái tồn</option>
+              <option value="in_stock">Còn hàng</option>
+              <option value="low_stock">Sắp hết hàng (≤ 5)</option>
+              <option value="out_of_stock">Hết hàng (0)</option>
+            </select>
+            <i data-lucide="chevron-down" class="select-chevron"></i>
+          </div>
+          
+          <button class="btn btn-outline-blue" id="btn-apply-filters">
+            <i data-lucide="filter"></i>
+            <span>Bộ lọc</span>
+          </button>
+          
+          <button class="btn btn-outline" id="btn-reset-filters">
+            <i data-lucide="rotate-ccw"></i>
+            <span>Đặt lại</span>
+          </button>
+        </div>
+        
+        <!-- ACTIVE FILTERS BADGES (HIDDEN BY DEFAULT) -->
+        <div class="active-filters-container" id="active-filters-badges" style="display: none;">
+          <span class="active-filters-label">Đang lọc theo:</span>
+          <div class="badge-list" id="filter-badges-list">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+        
+        <!-- PRODUCT CARDS GRID -->
+        <div class="product-cards-grid-wrapper">
+          <div class="product-cards-grid" id="product-cards-grid">
+            <!-- Rendered via JS -->
+          </div>
+          
+          <!-- Empty State (Hidden by default) -->
+          <div class="empty-state" id="table-empty-state" style="display: none;">
+            <i data-lucide="package-open"></i>
+            <h3>Không tìm thấy sản phẩm nào</h3>
+            <p>Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm của bạn.</p>
+          </div>
+        </div>
+        
+        <!-- PAGINATION BAR -->
+        <div class="pagination-bar">
+          <div class="pagination-info" id="pagination-summary">
+            Hiển thị 1 - 7 của 128 sản phẩm
+          </div>
+          
+          <div class="pagination-size">
+            <div class="select-wrapper mini-select">
+              <select id="select-page-size">
+                <option value="20" selected>20 / trang</option>
+                <option value="10">10 / trang</option>
+                <option value="50">50 / trang</option>
+                <option value="100">100 / trang</option>
+              </select>
+              <i data-lucide="chevron-down" class="select-chevron"></i>
+            </div>
+          </div>
+          
+          <div class="pagination-pages" id="pagination-buttons">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+        
+      </section>
+
+      <!-- SECTION: ĐƠN SỬA CHỮA -->
+      <section id="section-don-sua-chua" class="content-section">
+        <!-- Sub-navigation row -->
+        <div class="sub-tabs-wrapper">
+          <div class="sub-tabs-container" id="repair-tabs">
+            <button class="sub-tab active" data-tab="all">Tất cả <span class="tab-count" id="count-repair-all">26</span></button>
+            <button class="sub-tab" data-tab="in_progress">Đang sửa <span class="tab-count" id="count-repair-in-progress">10</span></button>
+            <button class="sub-tab" data-tab="completed">Hoàn thành <span class="tab-count" id="count-repair-completed">16</span></button>
+          </div>
+          
+          <button class="btn btn-primary" id="btn-create-repair-order">
+            <i data-lucide="plus"></i>
+            <span>Tạo đơn sửa mới</span>
+          </button>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="filter-bar">
+          <div class="search-wrapper">
+            <i data-lucide="search" class="search-icon"></i>
+            <input type="text" id="input-repair-search" placeholder="Tìm theo mã đơn, tên hoặc SĐT...">
+          </div>
+          
+          <div class="select-wrapper">
+            <select id="select-repair-status">
+              <option value="">Trạng thái</option>
+              <option value="IN_PROGRESS">Đang sửa</option>
+              <option value="COMPLETED">Hoàn thành</option>
+            </select>
+            <i data-lucide="chevron-down" class="select-chevron"></i>
+          </div>
+
+          <div class="date-group">
+            <input type="date" id="input-repair-from-date" placeholder="Từ ngày" title="Từ ngày">
+          </div>
+          
+          <div class="date-group">
+            <input type="date" id="input-repair-to-date" placeholder="Đến ngày" title="Đến ngày">
+          </div>
+
+          <button class="btn btn-outline-blue" id="btn-apply-repair-filters">
+            <i data-lucide="filter"></i>
+            <span>Bộ lọc</span>
+          </button>
+          
+          <button class="btn btn-outline" id="btn-reset-repair-filters">
+            <i data-lucide="rotate-ccw"></i>
+            <span>Đặt lại</span>
+          </button>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+          <table class="data-table clickable-rows">
+            <thead>
+              <tr>
+                <th class="w-110">Mã đơn</th>
+                <th class="w-150">Khách hàng</th>
+                <th class="w-130">SĐT</th>
+                <th class="w-200">Lỗi mô tả</th>
+                <th class="w-160">Phí sửa chữa (đ)</th>
+                <th class="w-180 text-center">Trạng thái</th>
+                <th class="w-150">Ngày tiếp nhận</th>
+              </tr>
+            </thead>
+            <tbody id="repair-table-body">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+          <div class="empty-state" id="repair-empty-state" style="display: none;">
+            <i data-lucide="wrench"></i>
+            <h3>Không tìm thấy đơn sửa chữa nào</h3>
+            <p>Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm.</p>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-bar">
+          <div class="pagination-info" id="repair-pagination-summary">
+            Hiển thị 1 - 7 của 26 đơn
+          </div>
+          <div class="pagination-size">
+            <div class="select-wrapper mini-select">
+              <select id="select-repair-page-size">
+                <option value="20" selected>20 / trang</option>
+                <option value="10">10 / trang</option>
+                <option value="50">50 / trang</option>
+              </select>
+              <i data-lucide="chevron-down" class="select-chevron"></i>
+            </div>
+          </div>
+          <div class="pagination-pages" id="repair-pagination-buttons">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION: CHI TIẾT ĐƠN SỬA -->
+      <section id="section-chi-tiet-don-sua" class="content-section">
+        <!-- Breadcrumb & Actions Row -->
+        <div class="detail-header-row">
+          <div class="breadcrumb-container">
+            <div class="breadcrumb-nav">
+              <a href="#" id="breadcrumb-repair-list">Đơn sửa chữa</a>
+              <i data-lucide="chevron-right" class="breadcrumb-chevron"></i>
+              <span id="detail-breadcrumb-code">SC-240501-001</span>
+            </div>
+            <h2 class="detail-title">Chi tiết đơn sửa</h2>
+          </div>
+          
+          <div class="detail-actions">
+            <button class="btn btn-secondary" id="btn-detail-print">
+              <i data-lucide="printer"></i>
+              <span>In phiếu</span>
+            </button>
+            <button class="btn btn-primary" id="btn-detail-edit">
+              <i data-lucide="edit-3"></i>
+              <span>Chỉnh sửa</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Main detail layout grid -->
+        <div class="detail-grid">
+          <!-- Left Column (Customer, Device, Order, Timeline) -->
+          <div class="detail-left-col">
+            
+            <!-- Cards Row -->
+            <div class="detail-cards-row">
+              <!-- Card 1: Thông tin khách hàng -->
+              <div class="detail-card">
+                <div class="card-title-row">
+                  <i data-lucide="user" class="card-icon text-blue"></i>
+                  <h3>Thông tin khách hàng</h3>
+                </div>
+                <div class="card-body-content">
+                  <div class="info-item">
+                    <label>Tên khách hàng</label>
+                    <span id="detail-customer-name">Nguyễn Văn A</span>
+                  </div>
+                  <div class="info-item">
+                    <label>Số điện thoại</label>
+                    <span id="detail-customer-phone">0901 234 567</span>
+                  </div>
+                  <div class="info-item">
+                    <label>Ghi chú</label>
+                    <span id="detail-customer-notes" class="badge-notes">Khách quen</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card 2: Thông tin máy -->
+              <div class="detail-card">
+                <div class="card-title-row">
+                  <i data-lucide="smartphone" class="card-icon text-green"></i>
+                  <h3>Thông tin máy</h3>
+                </div>
+                <div class="card-body-content flex-row-content">
+                  <div class="device-thumb" id="detail-device-thumb">
+                    <i data-lucide="smartphone"></i>
+                  </div>
+                  <div class="device-info-wrapper">
+                    <div class="info-item">
+                      <label>Thiết bị</label>
+                      <span id="detail-device-name">iPhone 13 Pro Max</span>
+                    </div>
+                    <div class="info-item">
+                      <label>Tình trạng</label>
+                      <span id="detail-device-status">Màn hình bị vỡ, cảm ứng không nhạy</span>
+                    </div>
+                    <div class="info-item">
+                      <label>Phụ kiện kèm theo</label>
+                      <span id="detail-device-accessories">Sạc, ốp lưng</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card 3: Thông tin đơn -->
+              <div class="detail-card">
+                <div class="card-title-row">
+                  <i data-lucide="file-text" class="card-icon text-purple"></i>
+                  <h3>Thông tin đơn</h3>
+                </div>
+                <div class="card-body-content">
+                  <div class="info-item">
+                    <label>Mã đơn</label>
+                    <span id="detail-order-code" class="font-weight-600">SC-240501-001</span>
+                  </div>
+                  <div class="info-item">
+                    <label>Ngày tiếp nhận</label>
+                    <span id="detail-order-date">01/05/2024 09:15</span>
+                  </div>
+                  <div class="form-row col-2-simple">
+                    <div class="info-item">
+                      <label>Trạng thái</label>
+                      <span id="detail-order-status-badge"></span>
+                    </div>
+                    <div class="info-item">
+                      <label>Kỹ thuật viên</label>
+                      <span id="detail-order-assignee" class="text-muted">Chưa phân công</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Timeline Card -->
+            <div class="detail-card full-width">
+              <div class="card-title-row">
+                <i data-lucide="history" class="card-icon text-blue"></i>
+                <h3>Tiến trình xử lý</h3>
+              </div>
+              
+              <div class="timeline-workflow">
+                <!-- Timeline Step 1: Tiếp nhận máy -->
+                <div class="timeline-item completed">
+                  <div class="timeline-badge">
+                    <i data-lucide="check"></i>
+                  </div>
+                  <div class="timeline-content">
+                    <div class="timeline-title-row">
+                      <h4>Tiếp nhận máy</h4>
+                      <span class="timeline-time" id="time-step-1">01/05/2024 09:15</span>
+                    </div>
+                    <p>Ghi nhận lỗi từ khách hàng và in biên nhận điện thoại</p>
+                  </div>
+                </div>
+
+                <!-- Timeline Step 2: Đang sửa chữa -->
+                <div class="timeline-item in-progress" id="timeline-step-2-container">
+                  <div class="timeline-badge" id="timeline-step-2-badge">
+                    <i data-lucide="check" id="timeline-step-2-icon"></i>
+                  </div>
+                  <div class="timeline-content">
+                    <div class="timeline-title-row">
+                      <h4>Đang sửa chữa</h4>
+                      <span class="timeline-time" id="time-step-2">01/05/2024 09:30</span>
+                    </div>
+                    <p>Kỹ thuật viên tiến hành tháo máy, kiểm tra chi tiết lỗi và thay thế linh kiện</p>
+                  </div>
+                </div>
+
+                <!-- Timeline Step 3: Hoàn thành -->
+                <div class="timeline-item" id="timeline-step-3-container">
+                  <div class="timeline-badge" id="timeline-step-3-badge">
+                    <i data-lucide="check" style="display: none;" id="timeline-step-3-icon"></i>
+                  </div>
+                  <div class="timeline-content">
+                    <div class="timeline-title-row">
+                      <h4>Hoàn thành</h4>
+                      <span class="timeline-time text-muted" id="time-step-3">Chưa hoàn thành</span>
+                    </div>
+                    <p>Khách hàng kiểm tra thiết bị hoạt động bình thường, thanh toán và bàn giao máy kèm phiếu bảo hành</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right Column (Billing, Pricing) -->
+          <div class="detail-right-col">
+            <div class="detail-card sticky-card">
+              <div class="card-title-row">
+                <i data-lucide="credit-card" class="card-icon text-purple"></i>
+                <h3>Thông tin thanh toán & bảo hành</h3>
+              </div>
+              
+              <div class="billing-summary">
+                <div class="billing-row">
+                  <span class="bill-label">Giá sửa chữa</span>
+                  <div class="bill-value-action">
+                    <span id="detail-repair-fee">1.200.000đ</span>
+                    <a href="#" class="edit-link-blue" id="btn-edit-repair-fee">Sửa</a>
+                  </div>
+                </div>
+                
+                <div class="billing-row">
+                  <span class="bill-label">Thời hạn bảo hành</span>
+                  <span class="bill-value" id="detail-warranty-months">3 tháng</span>
+                </div>
+                
+                <div class="billing-row">
+                  <span class="bill-label">Ngày hoàn thành</span>
+                  <span class="bill-value text-muted" id="detail-completed-date">-</span>
+                </div>
+                
+                <div class="billing-divider"></div>
+                
+                <div class="billing-total-row">
+                  <span class="total-label">Tổng tiền</span>
+                  <span class="total-value text-danger" id="detail-total-amount">1.200.000đ</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detail Footer Action Bar -->
+        <div class="detail-footer-bar">
+          <button class="btn btn-outline text-danger" id="btn-detail-cancel" style="margin-right: auto; border-color: rgba(239, 68, 68, 0.2);">Hủy đơn</button>
+          
+          <button class="btn btn-outline" id="btn-detail-save-temp">Lưu tạm</button>
+          <button class="btn btn-primary" id="btn-detail-mark-complete">Đánh dấu hoàn thành</button>
+        </div>
+      </section>
+
+      <!-- SECTION: BÁN HÀNG -->
+      <section id="section-ban-hang" class="content-section">
+        <!-- Sub-navigation row -->
+        <div class="sub-tabs-wrapper">
+          <div class="sub-tabs-container" id="sales-tabs">
+            <button class="sub-tab active" data-tab="all">Tất cả <span class="tab-count" id="count-sales-all">28</span></button>
+            <button class="sub-tab" data-tab="counter">Bán tại quầy <span class="tab-count" id="count-sales-counter">18</span></button>
+            <button class="sub-tab" data-tab="delivery">Giao hàng <span class="tab-count" id="count-sales-delivery">10</span></button>
+          </div>
+          
+          <button class="btn btn-primary" id="btn-create-sales-order">
+            <i data-lucide="plus"></i>
+            <span>Tạo đơn bán hàng</span>
+          </button>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="filter-bar">
+          <div class="search-wrapper">
+            <i data-lucide="search" class="search-icon"></i>
+            <input type="text" id="input-sales-search" placeholder="Tìm theo mã đơn, tên khách, SĐT...">
+          </div>
+          
+          <div class="select-wrapper">
+            <select id="select-sales-status">
+              <option value="">Trạng thái</option>
+              <option value="COUNTER_SALE">Thành công</option>
+              <option value="PROCESSING">Đang giao</option>
+              <option value="DELIVERED">Giao thành công</option>
+              <option value="CANCELLED">Đã hủy</option>
+            </select>
+            <i data-lucide="chevron-down" class="select-chevron"></i>
+          </div>
+          
+          <div class="select-wrapper">
+            <select id="select-sales-type">
+              <option value="">Hình thức</option>
+              <option value="COUNTER">Bán tại quầy</option>
+              <option value="DELIVERY">Giao hàng</option>
+            </select>
+            <i data-lucide="chevron-down" class="select-chevron"></i>
+          </div>
+
+          <div class="date-group">
+            <input type="date" id="input-sales-from-date" placeholder="Từ ngày" title="Từ ngày">
+          </div>
+          
+          <div class="date-group">
+            <input type="date" id="input-sales-to-date" placeholder="Đến ngày" title="Đến ngày">
+          </div>
+
+          <button class="btn btn-outline-blue" id="btn-apply-sales-filters">
+            <i data-lucide="filter"></i>
+            <span>Bộ lọc</span>
+          </button>
+          
+          <button class="btn btn-outline" id="btn-reset-sales-filters">
+            <i data-lucide="rotate-ccw"></i>
+            <span>Đặt lại</span>
+          </button>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="w-130">Mã đơn</th>
+                <th class="w-180">Khách hàng</th>
+                <th class="w-150">Hình thức</th>
+                <th class="w-150">Trạng thái</th>
+                <th class="w-150 text-right">Tổng tiền</th>
+                <th class="w-180">Ngày tạo</th>
+                <th class="w-100 text-center">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="sales-table-body">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+          <div class="empty-state" id="sales-empty-state" style="display: none;">
+            <i data-lucide="shopping-cart"></i>
+            <h3>Không tìm thấy đơn bán hàng nào</h3>
+            <p>Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm.</p>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-bar">
+          <div class="pagination-info" id="sales-pagination-summary">
+            Hiển thị 1 - 7 của 28 đơn
+          </div>
+          <div class="pagination-size">
+            <div class="select-wrapper mini-select">
+              <select id="select-sales-page-size">
+                <option value="20" selected>20 / trang</option>
+                <option value="10">10 / trang</option>
+                <option value="50">50 / trang</option>
+              </select>
+              <i data-lucide="chevron-down" class="select-chevron"></i>
+            </div>
+          </div>
+          <div class="pagination-pages" id="sales-pagination-buttons">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION: BẢO HÀNH -->
+      <section id="section-bao-hanh" class="content-section">
+        <!-- Warranty Top Layout: Search Card & 3 Stats Cards -->
+        <div class="warranty-top-grid">
+          <!-- Warranty Lookup Input Card -->
+          <div class="warranty-search-card">
+            <h3>Tìm kiếm bảo hành</h3>
+            <p class="warranty-search-desc">Nhập số điện thoại khách hàng hoặc mã đơn sửa để tra cứu</p>
+            <div class="warranty-search-row">
+              <div class="search-wrapper">
+                <i data-lucide="search" class="search-icon"></i>
+                <input type="text" id="input-warranty-search" placeholder="Nhập SĐT hoặc mã đơn sửa...">
+              </div>
+              <button class="btn btn-primary" id="btn-warranty-search">
+                <span>Tìm kiếm</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Warranty Metrics Widgets -->
+          <div class="warranty-metrics-container">
+            <div class="w-metric-card border-green">
+              <span class="w-metric-label">Còn bảo hành</span>
+              <h3 class="w-metric-value text-success" id="stat-warranty-active">12</h3>
+            </div>
+            <div class="w-metric-card border-danger">
+              <span class="w-metric-label">Hết hạn bảo hành</span>
+              <h3 class="w-metric-value text-danger" id="stat-warranty-expired">8</h3>
+            </div>
+            <div class="w-metric-card border-slate">
+              <span class="w-metric-label">Tổng bảo hành</span>
+              <h3 class="w-metric-value" id="stat-warranty-total">20</h3>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="w-130">Mã đơn sửa</th>
+                <th class="w-180">Khách hàng</th>
+                <th class="w-130">SĐT</th>
+                <th class="w-250">Nội dung sửa chữa</th>
+                <th class="w-150">Ngày hoàn thành</th>
+                <th class="w-150">Hết hạn bảo hành</th>
+                <th class="w-130">Trạng thái</th>
+                <th class="w-100 text-center">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="warranty-table-body">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+          <div class="empty-state" id="warranty-empty-state" style="display: none;">
+            <i data-lucide="shield-alert"></i>
+            <h3>Không tìm thấy dữ liệu bảo hành</h3>
+            <p>Nhập số điện thoại hoặc mã đơn khác để kiểm tra.</p>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-bar">
+          <div class="pagination-info" id="warranty-pagination-summary">
+            Hiển thị 1 - 5 của 20 bảo hành
+          </div>
+          <div class="pagination-size">
+            <div class="select-wrapper mini-select">
+              <select id="select-warranty-page-size">
+                <option value="20" selected>20 / trang</option>
+                <option value="10">10 / trang</option>
+                <option value="50">50 / trang</option>
+              </select>
+              <i data-lucide="chevron-down" class="select-chevron"></i>
+            </div>
+          </div>
+          <div class="pagination-pages" id="warranty-pagination-buttons">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION: CÀI ĐẶT -->
+      <section id="section-cai-dat" class="content-section">
+        <div class="settings-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 900px;">
+          
+          <!-- Thông tin cửa hàng -->
+          <div class="detail-card" style="grid-column: 1 / -1;">
+            <div class="card-title-row">
+              <i data-lucide="store" class="card-icon text-blue"></i>
+              <h3>Thông tin cửa hàng</h3>
+            </div>
+            <div class="card-body-content" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="info-item">
+                <label>Tên thương hiệu</label>
+                <span style="font-weight: 700; color: #d4af37;">DUO TECH</span>
+              </div>
+              <div class="info-item">
+                <label>Loại hình kinh doanh</label>
+                <span>Sửa chữa & Phụ kiện điện thoại</span>
+              </div>
+              <div class="info-item">
+                <label>Phiên bản hệ thống</label>
+                <span>v1.0.0 — Stable</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hỗ trợ khách hàng -->
+          <div class="detail-card">
+            <div class="card-title-row">
+              <i data-lucide="headphones" class="card-icon text-green"></i>
+              <h3>Hỗ trợ khách hàng</h3>
+            </div>
+            <div class="card-body-content">
+              <div class="info-item">
+                <label>Hotline hỗ trợ</label>
+                <a href="tel:0948203816" style="font-size: 20px; font-weight: 800; color: #d4af37; text-decoration: none; letter-spacing: 1px; display: flex; align-items: center; gap: 8px;">
+                  <i data-lucide="phone" style="width: 18px; height: 18px;"></i>
+                  0948 203 816
+                </a>
+              </div>
+              <div class="info-item" style="margin-top: 12px;">
+                <label>Giờ hỗ trợ</label>
+                <span>Thứ 2 — Chủ nhật: 8:00 - 20:00</span>
+              </div>
+              <div class="info-item" style="margin-top: 12px;">
+                <label>Phương thức</label>
+                <span>Gọi điện trực tiếp • Zalo OA</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cấu hình hệ thống -->
+          <div class="detail-card">
+            <div class="card-title-row">
+              <i data-lucide="sliders" class="card-icon text-purple"></i>
+              <h3>Cấu hình hệ thống</h3>
+            </div>
+            <div class="card-body-content">
+              <div class="info-item">
+                <label>Ngưỡng cảnh báo tồn kho</label>
+                <span>≤ 5 sản phẩm</span>
+              </div>
+              <div class="info-item" style="margin-top: 12px;">
+                <label>In hóa đơn</label>
+                <span>Khổ K80 — Nhiệt</span>
+              </div>
+              <div class="info-item" style="margin-top: 12px;">
+                <label>Múi giờ</label>
+                <span>UTC+7 (Hà Nội / TP.HCM)</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+      
+    </main>
+  </div>
+
+  <!-- ================= MODALS & POPUPS ================= -->
+  
+  <!-- MODAL: ADD / EDIT PRODUCT -->
+  <div class="modal-backdrop" id="product-modal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h2 id="modal-product-title">Thêm sản phẩm mới</h2>
+        <button class="close-btn" id="btn-close-product-modal"><i data-lucide="x"></i></button>
+      </div>
+      <form id="product-form" class="modal-form">
+        <!-- Hidden input for Product ID in edit mode -->
+        <input type="hidden" id="input-product-id">
+        
+        <div class="form-group full-width">
+          <label for="input-name">Tên sản phẩm <span class="required">*</span></label>
+          <input type="text" id="input-name" required placeholder="Ví dụ: Củ sạc nhanh 20W">
+        </div>
+        
+        <div class="form-row col-2">
+          <div class="form-group">
+            <label for="input-category">Loại sản phẩm <span class="required">*</span></label>
+            <div class="select-wrapper">
+              <select id="input-category" required>
+                <option value="ACCESSORY">Phụ kiện</option>
+                <option value="COMPONENT">Linh kiện</option>
+              </select>
+              <i data-lucide="chevron-down" class="select-chevron"></i>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="input-unit">Đơn vị tính <span class="required">*</span></label>
+            <input type="text" id="input-unit" required value="Cái" placeholder="Ví dụ: Cái, Hộp, Bộ">
+          </div>
+        </div>
+        
+        <div class="form-row col-2">
+          <div class="form-group">
+            <label for="input-cost-price">Giá nhập (VNĐ) <span class="required">*</span></label>
+            <input type="number" id="input-cost-price" required min="0" placeholder="Ví dụ: 65000">
+          </div>
+          
+          <div class="form-group">
+            <label for="input-selling-price">Giá bán (VNĐ) <span class="required">*</span></label>
+            <input type="number" id="input-selling-price" required min="0" placeholder="Ví dụ: 120000">
+          </div>
+        </div>
+        
+        <div class="form-row col-2">
+          <div class="form-group">
+            <label for="input-stock-quantity">Số lượng tồn kho ban đầu <span class="required">*</span></label>
+            <input type="number" id="input-stock-quantity" required min="0" value="0">
+          </div>
+          
+          <div class="form-group">
+            <label for="input-low-stock-threshold">Ngưỡng cảnh báo tồn tối thiểu</label>
+            <input type="number" id="input-low-stock-threshold" min="0" value="5" placeholder="Mặc định: 5">
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" id="btn-cancel-product-modal">Hủy bỏ</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-product">Lưu sản phẩm</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: QUICK IMPORT INVENTORY (NHẬP KHO) -->
+  <div class="modal-backdrop" id="import-stock-modal">
+    <div class="modal-window max-w-450">
+      <div class="modal-header">
+        <h2>Nhập thêm hàng vào kho</h2>
+        <button class="close-btn" id="btn-close-import-modal"><i data-lucide="x"></i></button>
+      </div>
+      <form id="import-stock-form" class="modal-form">
+        <div class="form-group full-width">
+          <label for="import-product-select">Chọn sản phẩm nhập kho <span class="required">*</span></label>
+          <div class="select-wrapper">
+            <select id="import-product-select" required>
+              <!-- Will be populated by JS -->
+            </select>
+            <i data-lucide="chevron-down" class="select-chevron"></i>
+          </div>
+        </div>
+        
+        <div class="form-group full-width">
+          <label for="import-quantity">Số lượng nhập thêm <span class="required">*</span></label>
+          <input type="number" id="import-quantity" required min="1" value="10">
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" id="btn-cancel-import-modal">Hủy bỏ</button>
+          <button type="submit" class="btn btn-success">Xác nhận nhập kho</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- DYNAMIC TOAST CONTAINER FOR NOTIFICATIONS -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- APP SCRIPTS -->
+  <script src="app.js"></script>
+</body>
+</html>
