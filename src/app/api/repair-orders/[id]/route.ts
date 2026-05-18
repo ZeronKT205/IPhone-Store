@@ -16,8 +16,12 @@ export async function GET(_req: NextRequest, { params }: Ctx) {
 }
 
 export async function PATCH(req: NextRequest, { params }: Ctx) {
-  const { id } = await params;
-  const order = await prisma.repairOrder.findUnique({ where: { id } });
+  const [{ id }, body] = await Promise.all([params, req.json()]);
+
+  const order = await prisma.repairOrder.findUnique({
+    where: { id },
+    select: { status: true },
+  });
   if (!order) return NextResponse.json({ success: false, error: "Không tìm thấy đơn" }, { status: 404 });
 
   if (order.status === RepairStatus.COMPLETED) {
@@ -26,8 +30,6 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
       { status: 403 }
     );
   }
-
-  const body = await req.json();
 
   // Nếu body chỉ có repairFee → dùng schema phí
   if ("repairFee" in body && Object.keys(body).length === 1) {
@@ -42,17 +44,13 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
   if (!parsed.success)
     return NextResponse.json({ success: false, error: parsed.error.errors[0].message }, { status: 400 });
 
-  const { warrantyMonths, ...prismaData } = parsed.data;
-  const updated = await prisma.repairOrder.update({ where: { id }, data: prismaData, include: { warranty: true } });
-  if (warrantyMonths !== undefined) {
-    await prisma.$executeRaw`UPDATE RepairOrder SET warrantyMonths = ${warrantyMonths} WHERE id = ${id}`;
-  }
-  return NextResponse.json({ success: true, data: { ...updated, warrantyMonths: warrantyMonths ?? 0 } });
+  const updated = await prisma.repairOrder.update({ where: { id }, data: parsed.data, include: { warranty: true } });
+  return NextResponse.json({ success: true, data: updated });
 }
 
 export async function DELETE(_req: NextRequest, { params }: Ctx) {
   const { id } = await params;
-  const order = await prisma.repairOrder.findUnique({ where: { id } });
+  const order = await prisma.repairOrder.findUnique({ where: { id }, select: { status: true } });
   if (!order) return NextResponse.json({ success: false, error: "Không tìm thấy đơn" }, { status: 404 });
   if (order.status === RepairStatus.COMPLETED) {
     return NextResponse.json({ success: false, error: "Không thể xóa đơn đã hoàn thành" }, { status: 403 });

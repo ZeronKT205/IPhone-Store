@@ -6,6 +6,7 @@ import {
   createDeliveryOrderSchema,
 } from "@/lib/validations/sales-order.schema";
 import { OrderType, SalesOrderStatus } from "@/constants/enums";
+import { invalidateOnOrderChange, invalidateProducts } from "@/lib/cache";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
@@ -31,9 +32,15 @@ export async function GET(req: NextRequest) {
     prisma.salesOrder.findMany({
       where,
       include: {
-        items: { include: { product: true } },
-        customer: true,
-        employee: true,
+        items: {
+          select: {
+            id: true, productId: true, productName: true,
+            quantity: true, unitPrice: true,
+            product: { select: { id: true, name: true, sellingPrice: true, stockQuantity: true } },
+          },
+        },
+        customer: { select: { id: true, name: true, phone: true } },
+        employee: { select: { id: true, name: true } },
       },
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
@@ -56,20 +63,22 @@ export async function POST(req: NextRequest) {
 
     return prisma.$transaction(async (tx) => {
       const orderCode = await generateSalesOrderCode();
+
+      const productIds = parsed.data.items.map((i) => i.productId);
+      const products = await tx.product.findMany({
+        where: { id: { in: productIds } },
+        select: { id: true, name: true, sellingPrice: true, stockQuantity: true },
+      });
+      const productMap = new Map(products.map((p) => [p.id, p]));
+
       let totalAmount = 0;
       const itemsData = [];
 
       for (const item of parsed.data.items) {
-        const product = await tx.product.findUnique({ where: { id: item.productId } });
+        const product = productMap.get(item.productId);
         if (!product) throw new Error(`Sản phẩm không tồn tại: ${item.productId}`);
         if (product.stockQuantity < item.quantity)
           throw new Error(`Sản phẩm "${product.name}" không đủ tồn kho`);
-
-        await tx.product.update({
-          where: { id: item.productId },
-          data: { stockQuantity: { decrement: item.quantity } },
-        });
-
         totalAmount += item.quantity * product.sellingPrice;
         itemsData.push({
           productId: item.productId,
@@ -78,6 +87,15 @@ export async function POST(req: NextRequest) {
           unitPrice: product.sellingPrice,
         });
       }
+
+      await Promise.all(
+        parsed.data.items.map((item) =>
+          tx.product.update({
+            where: { id: item.productId },
+            data: { stockQuantity: { decrement: item.quantity } },
+          })
+        )
+      );
 
       const order = await tx.salesOrder.create({
         data: {
@@ -93,6 +111,7 @@ export async function POST(req: NextRequest) {
         include: { items: true },
       });
 
+      await Promise.all([invalidateOnOrderChange(), invalidateProducts()]);
       return NextResponse.json({ success: true, data: order }, { status: 201 });
     }).catch((err) =>
       NextResponse.json({ success: false, error: err.message }, { status: 400 })
@@ -106,15 +125,30 @@ export async function POST(req: NextRequest) {
 
   return prisma.$transaction(async (tx) => {
     const orderCode = await generateSalesOrderCode();
+
+    const productIds = parsed.data.items.map((i) => i.productId);
+    const [products, employee] = await Promise.all([
+      tx.product.findMany({
+        where: { id: { in: productIds } },
+        select: { id: true, name: true, sellingPrice: true, stockQuantity: true },
+      }),
+      tx.employee.findUnique({
+        where: { id: parsed.data.employeeId },
+        select: { id: true, name: true },
+      }),
+    ]);
+
+    if (!employee) throw new Error("Nhân viên không tồn tại");
+    const productMap = new Map(products.map((p) => [p.id, p]));
+
     let totalAmount = 0;
     const itemsData = [];
 
     for (const item of parsed.data.items) {
-      const product = await tx.product.findUnique({ where: { id: item.productId } });
+      const product = productMap.get(item.productId);
       if (!product) throw new Error(`Sản phẩm không tồn tại`);
       if (product.stockQuantity < item.quantity)
         throw new Error(`Sản phẩm "${product.name}" không đủ tồn kho`);
-
       totalAmount += item.quantity * product.sellingPrice;
       itemsData.push({
         productId: item.productId,
@@ -125,10 +159,6 @@ export async function POST(req: NextRequest) {
     }
 
     const { items: _, customerId: _cid, ...deliveryFields } = parsed.data;
-
-    // Resolve employee name for snapshot
-    const employee = await tx.employee.findUnique({ where: { id: parsed.data.employeeId } });
-    if (!employee) throw new Error("Nhân viên không tồn tại");
 
     // Auto-create or link customer
     let resolvedCustomerId: string | null = parsed.data.customerId ?? null;
@@ -167,6 +197,7 @@ export async function POST(req: NextRequest) {
       include: { items: true, customer: true, employee: true },
     });
 
+    await invalidateOnOrderChange();
     return NextResponse.json({ success: true, data: order }, { status: 201 });
   }).catch((err) =>
     NextResponse.json({ success: false, error: err.message }, { status: 400 })

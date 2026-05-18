@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Header from "@/components/layout/Header";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
@@ -8,7 +8,7 @@ import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import {
   Plus, Search, Pencil, PackagePlus, AlertTriangle,
-  Eye, EyeOff, Tag, Layers,
+  Eye, EyeOff, Tag, Layers, ImagePlus, X, Loader2,
 } from "lucide-react";
 
 type Category = { id: string; name: string; _count?: { products: number } };
@@ -37,6 +37,107 @@ function ErrBanner({ msg }: { msg: string }) {
   );
 }
 
+// ─── Image Upload Component ────────────────────────────────────────────────
+function ImageUploader({
+  imageUrl,
+  onChange,
+}: {
+  imageUrl: string;
+  onChange: (url: string) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadErr, setUploadErr] = useState("");
+  const [dragging, setDragging] = useState(false);
+
+  const doUpload = async (file: File) => {
+    setUploading(true);
+    setUploadErr("");
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await fetch("/api/upload", { method: "POST", body: fd }).then((r) => r.json());
+    setUploading(false);
+    if (!res.success) { setUploadErr(res.error); return; }
+    onChange(res.url);
+  };
+
+  const handleFile = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    doUpload(files[0]);
+  };
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-sm font-medium" style={{ color: "var(--color-text)" }}>Ảnh sản phẩm</label>
+      <div
+        onClick={() => !uploading && inputRef.current?.click()}
+        onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={(e) => { e.preventDefault(); setDragging(false); handleFile(e.dataTransfer.files); }}
+        style={{
+          border: `2px dashed ${dragging ? "var(--color-brand)" : "var(--color-border)"}`,
+          borderRadius: "var(--radius-md)",
+          backgroundColor: dragging ? "var(--color-brand-muted, #eff6ff)" : "var(--color-bg)",
+          transition: "all 0.2s",
+          cursor: uploading ? "wait" : "pointer",
+          overflow: "hidden",
+          position: "relative",
+          minHeight: "120px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {uploading && (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+            <Loader2 size={24} className="animate-spin" style={{ color: "var(--color-brand)" }} />
+            <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>Đang tải ảnh...</span>
+          </div>
+        )}
+        {!uploading && imageUrl && (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={imageUrl}
+              alt="preview"
+              style={{ width: "100%", height: "120px", objectFit: "contain" }}
+            />
+            <button
+              onClick={(e) => { e.stopPropagation(); onChange(""); }}
+              style={{
+                position: "absolute", top: 6, right: 6,
+                background: "rgba(0,0,0,0.55)", borderRadius: "50%",
+                width: 22, height: 22, display: "flex", alignItems: "center",
+                justifyContent: "center", color: "#fff", cursor: "pointer",
+                border: "none",
+              }}
+            >
+              <X size={12} />
+            </button>
+          </>
+        )}
+        {!uploading && !imageUrl && (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: 16 }}>
+            <ImagePlus size={28} style={{ color: "var(--color-text-subtle)" }} />
+            <span className="text-xs text-center" style={{ color: "var(--color-text-subtle)" }}>
+              Kéo thả hoặc <strong style={{ color: "var(--color-brand)" }}>chọn ảnh</strong><br />
+              PNG, JPG, WebP – tối đa 5MB
+            </span>
+          </div>
+        )}
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: "none" }}
+          onChange={(e) => handleFile(e.target.files)}
+        />
+      </div>
+      {uploadErr && <p className="text-xs" style={{ color: "var(--color-danger)" }}>{uploadErr}</p>}
+    </div>
+  );
+}
+
 export default function InventoryPage() {
   const [tab, setTab] = useState<Tab>("products");
 
@@ -53,7 +154,7 @@ export default function InventoryPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  const emptyForm = { name: "", categoryId: "", unit: "Cái", costPrice: "", sellingPrice: "", stockQuantity: "0", lowStockThreshold: "5" };
+  const emptyForm = { name: "", categoryId: "", unit: "Cái", costPrice: "", sellingPrice: "", stockQuantity: "0", lowStockThreshold: "5", image: "" };
   const [form, setForm] = useState(emptyForm);
   const [stockQty, setStockQty] = useState("");
 
@@ -94,7 +195,10 @@ export default function InventoryPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        ...form,
+        name: form.name,
+        categoryId: form.categoryId,
+        unit: form.unit,
+        image: form.image || undefined,
         costPrice: form.costPrice ? parseInt(form.costPrice) : undefined,
         sellingPrice: parseInt(form.sellingPrice),
         stockQuantity: parseInt(form.stockQuantity),
@@ -118,6 +222,7 @@ export default function InventoryPage() {
         name: form.name,
         categoryId: form.categoryId,
         unit: form.unit,
+        image: form.image || null,
         costPrice: form.costPrice ? parseInt(form.costPrice) : undefined,
         sellingPrice: parseInt(form.sellingPrice),
         lowStockThreshold: parseInt(form.lowStockThreshold),
@@ -158,6 +263,7 @@ export default function InventoryPage() {
       name: p.name,
       categoryId: p.categoryId,
       unit: p.unit,
+      image: p.image ?? "",
       costPrice: String(p.costPrice ?? ""),
       sellingPrice: String(p.sellingPrice),
       stockQuantity: String(p.stockQuantity),
@@ -422,6 +528,10 @@ export default function InventoryPage() {
             <Input label="Đơn vị" required placeholder="Cái"
               value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} />
           </div>
+          <ImageUploader
+            imageUrl={form.image}
+            onChange={(url) => setForm({ ...form, image: url })}
+          />
           <div className="grid grid-cols-2 gap-3">
             <Input label="Giá nhập (đ)" type="number" placeholder="0"
               value={form.costPrice} onChange={(e) => setForm({ ...form, costPrice: e.target.value })} />
@@ -460,6 +570,10 @@ export default function InventoryPage() {
             <Input label="Đơn vị" value={form.unit}
               onChange={(e) => setForm({ ...form, unit: e.target.value })} />
           </div>
+          <ImageUploader
+            imageUrl={form.image}
+            onChange={(url) => setForm({ ...form, image: url })}
+          />
           <div className="grid grid-cols-2 gap-3">
             <Input label="Giá nhập (đ)" type="number"
               value={form.costPrice} onChange={(e) => setForm({ ...form, costPrice: e.target.value })} />

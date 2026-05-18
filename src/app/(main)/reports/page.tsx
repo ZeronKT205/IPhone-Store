@@ -124,11 +124,15 @@ export default function ReportsPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  const s   = data?.summary    ?? {};
-  const ops = data?.operations ?? {};
-  const chartData  = data?.chartData   ?? [];
-  const topProducts = data?.topProducts ?? [];
-  const pieData    = data?.pieData     ?? [];
+  const s            = data?.summary         ?? {};
+  const ops          = data?.operations      ?? {};
+  const chartData    = data?.chartData       ?? [];
+  const topProducts  = data?.topProducts     ?? [];
+  const pieData      = data?.pieData         ?? [];
+  const topEmployees = data?.topEmployees    ?? [];
+  const paymentBreakdown = data?.paymentBreakdown ?? [];
+  const inventory    = data?.inventory       ?? {};
+  const topCustomers = data?.topCustomers    ?? [];
 
   const periodLabel = period === "month" ? "tháng" : period === "quarter" ? "quý" : "năm";
   const subtitle = period === "year" ? "Tất cả các năm" : `Năm ${year}`;
@@ -578,6 +582,176 @@ export default function ReportsPage() {
               </table>
             </div>
           )}
+        </div>
+
+        {/* ── Nhân viên + Thanh toán ─────────────────────── */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+
+          {/* Top employees */}
+          <div className="p-5" style={{
+            backgroundColor: "var(--color-surface)",
+            borderRadius: "var(--radius-md)",
+            boxShadow: "var(--shadow-card)",
+          }}>
+            <div className="flex items-center gap-2 mb-4">
+              <Truck size={15} style={{ color: BLUE }} />
+              <p className="font-semibold" style={{ color: "var(--color-text)" }}>
+                Nhân viên giao hàng xuất sắc
+              </p>
+            </div>
+            {loading ? (
+              <div className="py-8 text-center text-sm" style={{ color: "var(--color-text-subtle)" }}>Đang tải...</div>
+            ) : topEmployees.length === 0 ? (
+              <div className="py-8 text-center text-sm" style={{ color: "var(--color-text-subtle)" }}>Chưa có dữ liệu</div>
+            ) : (
+              <div className="space-y-3">
+                {topEmployees.map((e: any, i: number) => {
+                  const maxCnt = topEmployees[0]?.deliveryCount ?? 1;
+                  const pct = maxCnt > 0 ? (e.deliveryCount / maxCnt) * 100 : 0;
+                  return (
+                    <div key={e.name} className="flex items-center gap-3">
+                      <span className="w-5 text-xs font-bold text-right flex-shrink-0"
+                        style={{ color: i < 3 ? GOLD : "var(--color-text-subtle)" }}>{i + 1}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-medium truncate" style={{ color: "var(--color-text)" }}>{e.name}</span>
+                          <span className="text-xs ml-2 flex-shrink-0" style={{ color: "var(--color-text-muted)" }}>
+                            {e.deliveryCount} đơn · {fmtShort(e.revenue)}
+                          </span>
+                        </div>
+                        <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "var(--color-border)" }}>
+                          <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: BLUE }} />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Payment breakdown */}
+          <div className="p-5" style={{
+            backgroundColor: "var(--color-surface)",
+            borderRadius: "var(--radius-md)",
+            boxShadow: "var(--shadow-card)",
+          }}>
+            <div className="flex items-center gap-2 mb-4">
+              <CheckCircle2 size={15} style={{ color: GREEN }} />
+              <p className="font-semibold" style={{ color: "var(--color-text)" }}>
+                Phương thức thanh toán
+              </p>
+            </div>
+            {loading ? (
+              <div className="py-8 text-center text-sm" style={{ color: "var(--color-text-subtle)" }}>Đang tải...</div>
+            ) : paymentBreakdown.length === 0 ? (
+              <div className="py-8 text-center text-sm" style={{ color: "var(--color-text-subtle)" }}>Chưa có dữ liệu</div>
+            ) : (
+              <div className="space-y-4">
+                {paymentBreakdown.map((p: any, i: number) => {
+                  const totalCnt = paymentBreakdown.reduce((a: number, x: any) => a + x.count, 0);
+                  const pct = totalCnt > 0 ? Math.round((p.count / totalCnt) * 100) : 0;
+                  const color = i === 0 ? GOLD : i === 1 ? BLUE : GREEN;
+                  return (
+                    <div key={p.method}>
+                      <div className="flex items-center justify-between text-sm mb-1.5">
+                        <span className="font-medium" style={{ color: "var(--color-text)" }}>{p.method}</span>
+                        <span style={{ color: "var(--color-text-muted)" }}>
+                          {p.count.toLocaleString("vi-VN")} đơn · {fmtShort(p.revenue)}
+                        </span>
+                      </div>
+                      <RateBar pct={pct} color={color} />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ── Tồn kho + Khách hàng VIP ───────────────────── */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+
+          {/* Inventory snapshot */}
+          <div className="p-5" style={{
+            backgroundColor: "var(--color-surface)",
+            borderRadius: "var(--radius-md)",
+            boxShadow: "var(--shadow-card)",
+          }}>
+            <div className="flex items-center gap-2 mb-4">
+              <Package size={15} style={{ color: "var(--color-brand)" }} />
+              <p className="font-semibold" style={{ color: "var(--color-text)" }}>
+                Tình trạng kho hàng
+              </p>
+            </div>
+            {loading ? (
+              <div className="py-8 text-center text-sm" style={{ color: "var(--color-text-subtle)" }}>Đang tải...</div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: "Sản phẩm đang bán",  value: (inventory.totalActive ?? 0).toLocaleString("vi-VN"),  color: GREEN },
+                  { label: "Cảnh báo tồn thấp",  value: (inventory.lowStock    ?? 0).toLocaleString("vi-VN"),  color: AMBER },
+                  { label: "Hết hàng",            value: (inventory.outOfStock  ?? 0).toLocaleString("vi-VN"),  color: RED   },
+                  { label: "Giá vốn tồn kho",     value: fmtShort(inventory.stockCostValue   ?? 0),             color: GOLD  },
+                  { label: "Giá bán tồn kho",     value: fmtShort(inventory.stockRetailValue ?? 0),             color: BLUE  },
+                  { label: "Lãi tiềm năng",       value: fmtShort((inventory.stockRetailValue ?? 0) - (inventory.stockCostValue ?? 0)), color: GREEN },
+                ].map(item => (
+                  <div key={item.label} className="p-3 rounded-lg"
+                    style={{ backgroundColor: "var(--color-bg)", border: "1px solid var(--color-border)" }}>
+                    <p className="text-xs mb-1" style={{ color: "var(--color-text-muted)" }}>{item.label}</p>
+                    <p className="text-lg font-bold" style={{ color: item.color }}>{item.value}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Top customers */}
+          <div className="p-5" style={{
+            backgroundColor: "var(--color-surface)",
+            borderRadius: "var(--radius-md)",
+            boxShadow: "var(--shadow-card)",
+          }}>
+            <div className="flex items-center gap-2 mb-4">
+              <UserPlus size={15} style={{ color: "#06b6d4" }} />
+              <p className="font-semibold" style={{ color: "var(--color-text)" }}>
+                Khách hàng VIP {period !== "year" ? `(${year})` : "(tổng)"}
+              </p>
+            </div>
+            {loading ? (
+              <div className="py-8 text-center text-sm" style={{ color: "var(--color-text-subtle)" }}>Đang tải...</div>
+            ) : topCustomers.length === 0 ? (
+              <div className="py-8 text-center text-sm" style={{ color: "var(--color-text-subtle)" }}>Chưa có dữ liệu</div>
+            ) : (
+              <div className="space-y-2">
+                {topCustomers.map((c: any, i: number) => {
+                  const maxRev = topCustomers[0]?.revenue ?? 1;
+                  const pct = maxRev > 0 ? (c.revenue / maxRev) * 100 : 0;
+                  return (
+                    <div key={c.phone} className="flex items-center gap-3">
+                      <span className="w-5 text-xs font-bold text-right flex-shrink-0"
+                        style={{ color: i < 3 ? GOLD : "var(--color-text-subtle)" }}>{i + 1}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="min-w-0">
+                            <span className="text-sm font-medium truncate block" style={{ color: "var(--color-text)" }}>{c.name}</span>
+                            <span className="text-xs" style={{ color: "var(--color-text-subtle)" }}>{c.phone}</span>
+                          </div>
+                          <span className="text-xs ml-2 flex-shrink-0 text-right" style={{ color: "var(--color-text-muted)" }}>
+                            {c.orderCount} đơn<br />
+                            <span style={{ color: GOLD }}>{fmtShort(c.revenue)}</span>
+                          </span>
+                        </div>
+                        <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "var(--color-border)" }}>
+                          <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: "#06b6d4" }} />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
 
       </div>

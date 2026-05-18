@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { generateRepairOrderCode } from "@/lib/order-code";
 import { createRepairOrderSchema } from "@/lib/validations/repair-order.schema";
+import { invalidateOnOrderChange } from "@/lib/cache";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
@@ -34,18 +35,7 @@ export async function GET(req: NextRequest) {
     prisma.repairOrder.count({ where }),
   ]);
 
-  // Attach warrantyMonths via raw SQL (Prisma binary may not know the field yet)
-  let monthsMap: Record<string, number> = {};
-  try {
-    const rows = await prisma.$queryRawUnsafe<{ id: string; warrantyMonths: number }[]>(
-      `SELECT id, warrantyMonths FROM RepairOrder WHERE id IN (${items.map(() => "?").join(",")})`,
-      ...items.map((o) => o.id)
-    );
-    rows.forEach((r) => { monthsMap[r.id] = r.warrantyMonths ?? 0; });
-  } catch { /* field not available in old binary */ }
-
-  const enriched = items.map((o) => ({ ...o, warrantyMonths: monthsMap[o.id] ?? 0 }));
-  return NextResponse.json({ success: true, data: { items: enriched, total, page, pageSize } });
+  return NextResponse.json({ success: true, data: { items, total, page, pageSize } });
 }
 
 export async function POST(req: NextRequest) {
@@ -56,16 +46,12 @@ export async function POST(req: NextRequest) {
 
   try {
     const orderCode = await generateRepairOrderCode();
-    // Strip warrantyMonths — Prisma binary may not know it yet; write via raw SQL after
-    const { warrantyMonths, ...prismaData } = parsed.data;
     const order = await prisma.repairOrder.create({
-      data: { ...prismaData, orderCode },
+      data: { ...parsed.data, orderCode },
       include: { warranty: true },
     });
-    if (warrantyMonths && warrantyMonths > 0) {
-      await prisma.$executeRaw`UPDATE RepairOrder SET warrantyMonths = ${warrantyMonths} WHERE id = ${order.id}`;
-    }
-    return NextResponse.json({ success: true, data: { ...order, warrantyMonths: warrantyMonths ?? 0 } }, { status: 201 });
+    await invalidateOnOrderChange();
+    return NextResponse.json({ success: true, data: order }, { status: 201 });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }

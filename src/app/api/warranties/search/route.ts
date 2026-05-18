@@ -16,7 +16,11 @@ export async function GET(req: NextRequest) {
         { customerName: { contains: q } },
       ],
     },
-    include: { warranty: true },
+    select: {
+      id: true, orderCode: true, customerName: true,
+      phoneNumber: true, description: true, completedAt: true,
+      warranty: { select: { expiryDate: true, notes: true } },
+    },
     orderBy: { completedAt: "desc" },
     take: 20,
   });

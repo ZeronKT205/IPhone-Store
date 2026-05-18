@@ -1,15 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { withCache, invalidateCategories, invalidateProducts, CATEGORIES_KEY, TTL } from "@/lib/cache";
 import { z } from "zod";
 
 const schema = z.object({ name: z.string().min(1, "Vui lòng nhập tên danh mục") });
 
 export async function GET() {
-  const categories = await prisma.category.findMany({
-    orderBy: { name: "asc" },
-    include: { _count: { select: { products: true } } },
-  });
-  return NextResponse.json({ success: true, data: categories });
+  const { data, hit } = await withCache(CATEGORIES_KEY, TTL.CATEGORIES, () =>
+    prisma.category.findMany({
+      orderBy: { name: "asc" },
+      include: { _count: { select: { products: true } } },
+    })
+  );
+  return NextResponse.json(
+    { success: true, data },
+    { headers: { "X-Cache": hit ? "HIT" : "MISS" } }
+  );
 }
 
 export async function POST(req: NextRequest) {
@@ -24,6 +30,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: "Danh mục đã tồn tại" }, { status: 400 });
 
     const category = await prisma.category.create({ data: parsed.data });
+    await Promise.all([invalidateCategories(), invalidateProducts()]);
     return NextResponse.json({ success: true, data: category }, { status: 201 });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });

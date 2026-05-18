@@ -16,7 +16,11 @@ export async function GET() {
       status: RepairStatus.COMPLETED,
       warranty: { isNot: null },
     },
-    include: { warranty: true },
+    select: {
+      id: true, orderCode: true, customerName: true,
+      phoneNumber: true, description: true, completedAt: true,
+      warranty: { select: { expiryDate: true, notes: true } },
+    },
     orderBy: { completedAt: "desc" },
     take: 50,
   });

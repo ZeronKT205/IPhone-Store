@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { addStockSchema } from "@/lib/validations/product.schema";
+import { invalidateProducts, invalidateDashboard } from "@/lib/cache";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -19,5 +20,6 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     data: { stockQuantity: { increment: parsed.data.quantity } },
   });
 
+  await Promise.all([invalidateProducts(), invalidateDashboard()]);
   return NextResponse.json({ success: true, data: updated });
 }
