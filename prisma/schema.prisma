@@ -39,6 +39,8 @@ model Warranty {
   expiryDate    DateTime
   notes         String?
   repairOrder   RepairOrder @relation(fields: [repairOrderId], references: [id])
+
+  @@index([expiryDate])
 }
 
 model Product {

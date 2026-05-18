@@ -12,10 +12,19 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: true, data: customer });
   }
 
+  let searchCond = {};
+  if (q) {
+    const cleanQ = q.trim();
+    const isPhone = /^[0-9]{3,15}$/.test(cleanQ);
+    if (isPhone) {
+      searchCond = { phone: { startsWith: cleanQ } };
+    } else {
+      searchCond = { name: { contains: cleanQ, mode: "insensitive" as const } };
+    }
+  }
+
   const customers = await prisma.customer.findMany({
-    where: q
-      ? { OR: [{ name: { contains: q } }, { phone: { contains: q } }] }
-      : undefined,
+    where: q ? searchCond : undefined,
     orderBy: { createdAt: "desc" },
   });
   return NextResponse.json({ success: true, data: customers });

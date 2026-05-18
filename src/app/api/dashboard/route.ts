@@ -10,31 +10,29 @@ async function fetchDashboard() {
   const endOfLastMonth  = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
 
   const [
-    repairInProgress,
-    repairCompletedThisMonth,
-    repairCompletedLastMonth,
-    salesThisMonth,
-    salesLastMonth,
+    repairStats,
+    salesStats,
     lowStockCount,
     warrantyActive,
     recentRepairs,
     recentSales,
   ] = await Promise.all([
-    prisma.repairOrder.count({ where: { status: RepairStatus.IN_PROGRESS } }),
-    prisma.repairOrder.count({
-      where: { status: RepairStatus.COMPLETED, completedAt: { gte: startOfMonth } },
-    }),
-    prisma.repairOrder.count({
-      where: { status: RepairStatus.COMPLETED, completedAt: { gte: startOfLastMonth, lte: endOfLastMonth } },
-    }),
-    prisma.salesOrder.aggregate({
-      where: { status: { in: [SalesOrderStatus.COUNTER_SALE, SalesOrderStatus.DELIVERED] }, completedAt: { gte: startOfMonth } },
-      _sum: { totalAmount: true },
-    }),
-    prisma.salesOrder.aggregate({
-      where: { status: { in: [SalesOrderStatus.COUNTER_SALE, SalesOrderStatus.DELIVERED] }, completedAt: { gte: startOfLastMonth, lte: endOfLastMonth } },
-      _sum: { totalAmount: true },
-    }),
+    // Group 3 RepairOrder counts into 1 raw query
+    prisma.$queryRaw<[{ in_progress: bigint; completed_this_month: bigint; completed_last_month: bigint }]>`
+      SELECT 
+        COUNT(*) FILTER (WHERE "status" = 'IN_PROGRESS')::BIGINT as in_progress,
+        COUNT(*) FILTER (WHERE "status" = 'COMPLETED' AND "completedAt" >= ${startOfMonth})::BIGINT as completed_this_month,
+        COUNT(*) FILTER (WHERE "status" = 'COMPLETED' AND "completedAt" >= ${startOfLastMonth} AND "completedAt" <= ${endOfLastMonth})::BIGINT as completed_last_month
+      FROM "RepairOrder"
+    `,
+    // Group 2 SalesOrder aggregates into 1 raw query
+    prisma.$queryRaw<[{ this_month: bigint | null; last_month: bigint | null }]>`
+      SELECT 
+        SUM("totalAmount") FILTER (WHERE "completedAt" >= ${startOfMonth})::BIGINT as this_month,
+        SUM("totalAmount") FILTER (WHERE "completedAt" >= ${startOfLastMonth} AND "completedAt" <= ${endOfLastMonth})::BIGINT as last_month
+      FROM "SalesOrder"
+      WHERE "status" IN ('COUNTER_SALE', 'DELIVERED') AND "completedAt" >= ${startOfLastMonth}
+    `,
     prisma.product.count({ where: { isActive: true, stockQuantity: { lte: 5 } } }),
     prisma.warranty.count({ where: { expiryDate: { gt: now } } }),
     prisma.repairOrder.findMany({
@@ -57,8 +55,16 @@ async function fetchDashboard() {
     }),
   ]);
 
-  const salesThisMonthVal  = salesThisMonth._sum.totalAmount  ?? 0;
-  const salesLastMonthVal  = salesLastMonth._sum.totalAmount  ?? 0;
+  const rep = repairStats[0];
+  const sal = salesStats[0];
+
+  const repairInProgress         = Number(rep?.in_progress ?? 0);
+  const repairCompletedThisMonth = Number(rep?.completed_this_month ?? 0);
+  const repairCompletedLastMonth = Number(rep?.completed_last_month ?? 0);
+
+  const salesThisMonthVal  = Number(sal?.this_month ?? 0);
+  const salesLastMonthVal  = Number(sal?.last_month ?? 0);
+
   const saleTrend    = salesLastMonthVal    ? Math.round(((salesThisMonthVal - salesLastMonthVal) / salesLastMonthVal) * 100) : 0;
   const repairTrend  = repairCompletedLastMonth ? Math.round(((repairCompletedThisMonth - repairCompletedLastMonth) / repairCompletedLastMonth) * 100) : 0;
 

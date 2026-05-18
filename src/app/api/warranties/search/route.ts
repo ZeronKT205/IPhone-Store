@@ -6,15 +6,25 @@ export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get("q")?.trim();
   if (!q) return NextResponse.json({ success: false, error: "Vui lòng nhập từ khóa tìm kiếm" }, { status: 400 });
 
+  const isPhone = /^[0-9]{3,15}$/.test(q);
+  const isOrderCode = q.toUpperCase().startsWith("SC") || q.includes("-");
+
+  let searchCond: any = {};
+  if (isPhone) {
+    searchCond = { phoneNumber: { startsWith: q } };
+  } else if (isOrderCode) {
+    searchCond = { orderCode: { startsWith: q, mode: "insensitive" as const } };
+  } else {
+    searchCond = {
+      customerName: { contains: q, mode: "insensitive" as const }
+    };
+  }
+
   const orders = await prisma.repairOrder.findMany({
     where: {
       status: RepairStatus.COMPLETED,
       warranty: { isNot: null },
-      OR: [
-        { phoneNumber: { contains: q } },
-        { orderCode: { contains: q } },
-        { customerName: { contains: q } },
-      ],
+      ...searchCond,
     },
     select: {
       id: true, orderCode: true, customerName: true,
