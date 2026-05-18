@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin, STORAGE_BUCKET } from "@/lib/supabase";
+import { getSupabaseAdmin, STORAGE_BUCKET } from "@/lib/supabase";
 
 export async function POST(req: NextRequest) {
   try {
@@ -40,7 +40,8 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(arrayBuffer);
 
     // Upload to Supabase Storage
-    const { error: uploadError } = await supabaseAdmin.storage
+    const supabase = getSupabaseAdmin();
+    const { error: uploadError } = await supabase.storage
       .from(STORAGE_BUCKET)
       .upload(filePath, buffer, {
         contentType: file.type,
@@ -56,7 +57,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Get public URL
-    const { data: urlData } = supabaseAdmin.storage
+    const { data: urlData } = supabase.storage
       .from(STORAGE_BUCKET)
       .getPublicUrl(filePath);
 
